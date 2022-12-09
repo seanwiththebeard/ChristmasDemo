@@ -1,12 +1,9 @@
 #include <stdint.h>
-
 typedef uint8_t byte;	// 8-bit unsigned
 
 byte* TextScreen = (byte*)(0x0400);
-byte i, x, y = 8;
-
-#define PutSpace() TextScreen[x + 40*y] = ' '
-#define PutStar() TextScreen[x + 40*y] = '*'
+byte i, x, z, line = 0;
+#define XCorner 8
 
 byte PatternData[9] =
 {
@@ -21,43 +18,36 @@ byte PatternData[9] =
 0b00001111
 };
 
-
-void DrawLine(byte line)
+void PutChar(char q)
 {
-  x = 8;
-  for (i = 7; i > 0; --i)
-  {
-    if (PatternData[line] >> i & 1)
-      PutStar();
-    else
-      PutSpace();
-    ++x;
-  }
-  
-  {
-    if (line > 2)
-      PutStar();
-    else
-      PutSpace();
-    ++x;
-  }
-  
-  for (i = 1; i < 8; ++i)
-  {
-    if (PatternData[line] >> i & 1)
-      PutStar();
-    else
-      PutSpace();
-    ++x;
-  }
-  ++y;
+  TextScreen[x + 40*z] = q;
+  TextScreen[30 - x + 40*z] = q;
+  ++x;
+}
+void Draw(byte r)
+{
+  if (PatternData[r] >> i & 1)
+    PutChar('*');
+  else
+    PutChar(' ');
 }
 
 void main(void)
-{
-  byte i;
-  for (i = 0; i < 8; ++i)
-    DrawLine(i);
-  for (i = 8; i != 255; --i)
-    DrawLine(i);
+{    
+  for (z = 0; z < 17; ++z)
+  {
+    x = XCorner;
+    line = z;
+    if (line > 7)
+      line  = 8 - (line - 8);
+    for (i = 7; i > 0; --i)
+    {
+      Draw(line);
+    }
+    
+    if (line > 2)
+      PutChar('*');
+    else
+      PutChar(' ');
+  }
 }
